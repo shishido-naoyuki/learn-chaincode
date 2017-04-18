@@ -81,9 +81,9 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 	password = args[1]
 	var account = Account{ID: username, PASSWORD: password, CashBalance: 10000000.0}
 	accountBytes, err := json.Marshal(&account)
-	existingBytes, err := stub.GetState(account.ID)
+	//existingBytes, err := stub.GetState(account.ID)
 	if err == nil {
-		err = json.Unmarshal(existingBytes, &account)
+		//err = json.Unmarshal(existingBytes, &account)
 		if err != nil {
 			fmt.Println("Error unmarshalling account " + account.ID + "\n--->: " + err.Error())
 		}
