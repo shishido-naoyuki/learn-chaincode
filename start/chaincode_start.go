@@ -81,9 +81,9 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 	password = args[1]
 	var account = Account{ID: username, PASSWORD: password, CashBalance: 10000000.0}
 	accountBytes, err := json.Marshal(&account)
-	if err == nil {
-		fmt.Println("Account already exists for " + account.ID + " " + account.ID)
-		return nil, errors.New("aCan't reinitialize existing user " + account.ID)
+	if err != nil {
+		fmt.Println("error creating account" + account.ID)
+		return nil, errors.New("Error creating account " + account.ID)
 	} else {
 		fmt.Println("No existing account found for " + account.ID + ", initializing account.")
 		err = stub.PutState(account.ID, accountBytes)
