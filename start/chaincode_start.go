@@ -17,12 +17,18 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
+type Account struct {
+	ID          string  `json:"id"`
+	PASSWORD          string  `json:"password"`
+	CashBalance float64 `json:"cashBalance"`
+}
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
 }
@@ -73,7 +79,21 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 
 	username = args[0]                            //rename for fun
 	password = args[1]
-	err = stub.PutState(username, []byte(password))  //write the variable into the chaincode state
+	var account = Account{ID: username, PASSWORD: password, CashBalance: 10000000.0}
+	accountBytes, err := json.Marshal(&account)
+	existingBytes, err := stub.GetState(account.ID)
+	if err == nil {
+		err = json.Unmarshal(existingBytes, &account)
+		if err != nil {
+			fmt.Println("Error unmarshalling account " + account.ID + "\n--->: " + err.Error())
+		}
+		fmt.Println("Account already exists for " + account.ID + " " + account.ID)
+		return nil, errors.New("Can't reinitialize existing user " + account.ID)
+	} else {
+		fmt.Println("No existing account found for " + account.ID + ", initializing account.")
+		err = stub.PutState(account.ID, accountBytes)
+	}
+	//err = stub.PutState(username, []byte(password))  //write the variable into the chaincode state
 	if err != nil {
 		return nil, err
 	}
