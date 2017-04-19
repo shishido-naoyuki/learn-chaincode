@@ -66,8 +66,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
     if function == "init" {
         return t.Init(stub, "init", args)
     } else if function == "createAccount" {
-    	fmt.Println("aaa:")
         return t.createAccount(stub, args)
+    } else if function == "listRead" {
+        return t.listRead(stub, args)
     }
     fmt.Println("invoke did not find func: " + function)
 
