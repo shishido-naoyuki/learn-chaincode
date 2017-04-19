@@ -97,6 +97,7 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 	//uesr's list make
 	var accountlist AccountList
 	AccountListBytes, err := stub.GetState("LIST")
+	err = json.Unmarshal(AccountListBytes, &accountlist)
 	if err != nil {
 		accountlist = AccountList{LIST: "LIST", UserID: []string{username}}
 		accountBytes, err := json.Marshal(accountlist)
@@ -106,17 +107,12 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 		}
 		err = stub.PutState("LIST", accountBytes)
 	} else {
-		err = json.Unmarshal(AccountListBytes, &accountlist)
-		if err != nil {
-			fmt.Println("accountlistError")
-			return nil, errors.New("accountlistError" + username)
-		} else {
-			accountlist.UserID = append(accountlist.UserID, username)
-			accountUpdataBytes, err := json.Marshal(&accountlist)
-			if err !=  nil {
-				fmt.Println("accountUpdataBytesError")
-				return nil, errors.New("accountUpdataBytesError" + account.ID)
-			}
+		accountlist.UserID = append(accountlist.UserID, username)
+		accountUpdataBytes, err := json.Marshal(&accountlist)
+		if err !=  nil {
+			fmt.Println("accountUpdataBytesError")
+			return nil, errors.New("accountUpdataBytesError" + account.ID)
+		}
 			err = stub.PutState(accountlist.LIST, accountUpdataBytes)
 		}
 	}
