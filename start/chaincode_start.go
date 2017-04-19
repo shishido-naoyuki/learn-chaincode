@@ -149,17 +149,6 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     username = args[0]
     password = args[1]
     
-    /*
-    valAsbytes, err := stub.GetState(username)
-    err = json.Unmarshal(valAsbytes, &account)
-    if err != nil {
-        jsonResp = "{\"Error\":\"Failed to get state for " + username + "\"}"
-        return nil, errors.New(jsonResp)
-    }
-
-	return valAsbytes, nil
-	*/
-    
     accountBytes, err := stub.GetState(username)
     err = json.Unmarshal(accountBytes, &account)
     if err != nil {
@@ -179,15 +168,17 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
 func (t *SimpleChaincode) listRead(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 	var list, jsonResp string
 	var err error
+	var accountlist AccountList
     if len(args) != 1 {
         return nil, errors.New("Incorrect number of arguments. Expecting name of the key to query")
     }
 
     list = args[0]
-    accountBytes, err := stub.GetState("LIST")
+    accountListBytes, err := stub.GetState("LIST")
+    err = json.Unmarshal(accountListBytes, &accountlist)
     if err != nil {
         jsonResp = "{\"Error\":\"Failed to get state for " + list + "\"}"
         return nil, errors.New(jsonResp)
     }
-    return accountBytes, nil
+    return accountListBytes, nil
 }
