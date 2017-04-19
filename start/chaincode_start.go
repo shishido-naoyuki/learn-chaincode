@@ -29,6 +29,12 @@ type Account struct {
 	PASSWORD          string  `json:"password"`
 	CashBalance float64 `json:"cashBalance"`
 }
+
+type AccountList struct {
+	LIST          string  `json:"list"`
+	UserID        []string  `json:"userid"`
+}
+
 // SimpleChaincode example simple Chaincode implementation
 type SimpleChaincode struct {
 }
@@ -76,7 +82,8 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 	if len(args) != 2 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 2. name of the key and value to set")
 	}
-
+	
+	//user create
 	username = args[0]                            //rename for fun
 	password = args[1]
 	var account = Account{ID: username, PASSWORD: password, CashBalance: 10000000.0}
@@ -88,9 +95,31 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 		fmt.Println("No existing account found for " + account.ID + ", initializing account.")
 		err = stub.PutState(account.ID, accountBytes)
 	}
-	//err = stub.PutState(username, []byte(password))  //write the variable into the chaincode state
-	if err != nil {
-		return nil, err
+	//uesr's list make
+	var accountlist AccountList
+	AccountListBytes, err := stub.GetState("LIST")
+	if err == nil {
+		err = json.Unmarshal(AccountListBytes, &accountlist)
+		if err != nil {
+			fmt.Println("accountlistError")
+			return nil, errors.New("accountlistError" + username)
+		} else {
+			accountlist.UserID = append(accountlist.UserID, username)
+			accountUpdataBytes, err := json.Marshal(&accountlist)
+			if err !=  nil {
+				fmt.Println("accountUpdataBytesError")
+				return nil, errors.New("accountUpdataBytesError" + account.ID)
+			}
+			err = stub.PutState(accountlist.LIST, accountUpdataBytes)
+		}
+	} else {
+		accountlist = AccountList{LIST: "LIST", UserID: []string{username}}
+		accountBytes, err := json.Marshal(accountlist)
+		if err !=  nil {
+				fmt.Println("accountBytesError")
+				return nil, errors.New("accountBytesError" + account.ID)
+		}
+		err = stub.PutState("LIST", accountBytes)
 	}
 	return nil, nil
 }
@@ -105,7 +134,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 	}
 	fmt.Println("query did not find func: " + function)						//error
 
-	return nil, errors.New("aaaReceived unknown function query: " + function)
+	return nil, errors.New("Received unknown function query: " + function)
 }
 
 func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
