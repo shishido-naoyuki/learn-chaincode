@@ -119,9 +119,13 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     username = args[0]
     password = args[1]
     accountBytes, err := stub.GetState(username)
+    if err != nil {
+        jsonResp = "{\"Error\":\"Failed1 to get state for " + username + "\"}"
+        return nil, errors.New(jsonResp)
+    }
     err = json.Unmarshal(accountBytes, &account)
     if err != nil {
-        jsonResp = "{\"Error\":\"Failed to get state for " + username + "\"}"
+        jsonResp = "{\"Error\":\"Failed2 to get state for " + username + "\"}"
         return nil, errors.New(jsonResp)
     }
     if account.PASSWORD != password {
