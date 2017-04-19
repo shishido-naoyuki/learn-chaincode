@@ -109,7 +109,7 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 }
 
 func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
-	var username, /*password,*/ jsonResp string
+	var username, password, jsonResp string
 	var err error
 	var account Account
     if len(args) != 2 {
@@ -117,9 +117,9 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     }
 
     username = args[0]
-    //password = args[1]
+    password = args[1]
     
-    
+    /*
     valAsbytes, err := stub.GetState(username)
     err = json.Unmarshal(valAsbytes, &account)
     if err != nil {
@@ -128,8 +128,8 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     }
 
 	return valAsbytes, nil
-
-    /*
+	*/
+    
     accountBytes, err := stub.GetState(username)
     err = json.Unmarshal(accountBytes, &account)
     if err != nil {
@@ -138,9 +138,10 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     }
     if account.PASSWORD != password {
 		jsonResp = "{\"Error\":\"login error \"}"
+		return nil, errors.New(jsonResp)
     }
 	
     return accountBytes, nil
     
-    */
+    
 }
