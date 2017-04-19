@@ -183,7 +183,7 @@ func (t *SimpleChaincode) listRead(stub shim.ChaincodeStubInterface, args []stri
     }
 
     list = args[0]
-    accountBytes, err := stub.GetState(list)
+    accountBytes, err := stub.GetState("LIST")
     if err != nil {
         jsonResp = "{\"Error\":\"Failed to get state for " + list + "\"}"
         return nil, errors.New(jsonResp)
