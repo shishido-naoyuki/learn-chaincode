@@ -98,7 +98,15 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 	//uesr's list make
 	var accountlist AccountList
 	AccountListBytes, err := stub.GetState("LIST")
-	if err == nil {
+	if err != nil {
+		accountlist = AccountList{LIST: "LIST", UserID: []string{username}}
+		accountBytes, err := json.Marshal(accountlist)
+		if err !=  nil {
+				fmt.Println("accountBytesError")
+				return nil, errors.New("accountBytesError" + account.ID)
+		}
+		err = stub.PutState("LIST", accountBytes)
+	} else {
 		err = json.Unmarshal(AccountListBytes, &accountlist)
 		if err != nil {
 			fmt.Println("accountlistError")
@@ -112,14 +120,6 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 			}
 			err = stub.PutState(accountlist.LIST, accountUpdataBytes)
 		}
-	} else {
-		accountlist = AccountList{LIST: "LIST", UserID: []string{username}}
-		accountBytes, err := json.Marshal(accountlist)
-		if err !=  nil {
-				fmt.Println("accountBytesError")
-				return nil, errors.New("accountBytesError" + account.ID)
-		}
-		err = stub.PutState("LIST", accountBytes)
 	}
 	return nil, nil
 }
