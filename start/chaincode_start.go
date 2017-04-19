@@ -174,3 +174,19 @@ func (t *SimpleChaincode) read(stub shim.ChaincodeStubInterface, args []string) 
     
     
 }
+
+func (t *SimpleChaincode) listRead(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var list, jsonResp string
+	var err error
+    if len(args) != 1 {
+        return nil, errors.New("Incorrect number of arguments. Expecting name of the key to query")
+    }
+
+    list = args[0]
+    accountBytes, err := stub.GetState(list)
+    if err != nil {
+        jsonResp = "{\"Error\":\"Failed to get state for " + list + "\"}"
+        return nil, errors.New(jsonResp)
+    }
+    return accountBytes, nil
+}
