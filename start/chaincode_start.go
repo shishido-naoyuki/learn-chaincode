@@ -112,7 +112,7 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 		if err !=  nil {
 			fmt.Println("accountUpdataBytesError")
 			return nil, errors.New("accountUpdataBytesError" + account.ID)
-		}
+		} else{
 			err = stub.PutState(accountlist.LIST, accountUpdataBytes)
 		}
 	}
