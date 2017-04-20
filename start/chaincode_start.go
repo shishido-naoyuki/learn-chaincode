@@ -20,7 +20,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-
+	"strconv"
+	
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
@@ -67,6 +68,8 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
         return t.Init(stub, "init", args)
     } else if function == "createAccount" {
         return t.createAccount(stub, args)
+    } else if function == "moneyTransfer" {
+        return t.moneyTransfer(stub, args)
     }
     fmt.Println("invoke did not find func: " + function)
 
@@ -116,6 +119,64 @@ func (t *SimpleChaincode) createAccount(stub shim.ChaincodeStubInterface, args [
 			err = stub.PutState(accountlist.LIST, accountUpdataBytes)
 		}
 	}
+	return nil, nil
+}
+
+func (t *SimpleChaincode) moneyTransfer(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+	var fromUsername, toUsername string
+	var money float64
+	var err error
+	
+	fmt.Println("running moneyTransfer()")
+
+	if len(args) != 3 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 2. name of the key and value to set")
+	}
+	
+	fromUsername = args[0]                            //rename for fun
+	toUsername = args[1]
+	money, err = strconv.ParseFloat(args[2], 64)
+	if err != nil {
+		fmt.Println("moneyParseFloatError")
+		return nil, errors.New("moneyParseFloatError")
+	}
+	
+	var fromAccount Account
+	var toAccount Account
+	
+	fromAccountBytes, err := stub.GetState(fromUsername)
+	err = json.Unmarshal(fromAccountBytes, &fromAccount)
+	if err != nil {
+		fmt.Println("fromAccountBytesError")
+		return nil, errors.New("fromAccountBytesError")
+	}
+
+	toAccountBytes, err := stub.GetState(toUsername)
+	err = json.Unmarshal(toAccountBytes, &toAccount)
+	if err != nil {
+		fmt.Println("toAccountBytesError")
+		return nil, errors.New("toAccountBytesError")
+	}
+	
+	fromAccount.CashBalance -= money
+	toAccount.CashBalance += money
+	
+	fromAccountUpdataBytes, err := json.Marshal(&fromAccount)
+	if err !=  nil {
+		fmt.Println("fromAccountUpdataBytesError")
+			return nil, errors.New("fromAccountUpdataBytesError")
+	} else{
+		err = stub.PutState(fromAccount.ID, fromAccountUpdataBytes)
+	}
+	
+	toAccountUpdataBytes, err := json.Marshal(&toAccount)
+	if err !=  nil {
+		fmt.Println("toAccountUpdataBytesError")
+		return nil, errors.New("toAccountUpdataBytesError")
+	} else{
+		err = stub.PutState(toAccount.ID, toAccountUpdataBytes)
+	}
+	
 	return nil, nil
 }
 
